@@ -1,5 +1,5 @@
 %{
-    #include "q3.tab.h"
+    #include "calc.tab.h"
     #include <stdlib.h>
 %}
 
