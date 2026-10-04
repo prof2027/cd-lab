@@ -1,5 +1,5 @@
 %{
-#include "y.tab.h"
+#include "ast.tab.h"
 #include <string.h>
 #include <stdlib.h>
 %}
