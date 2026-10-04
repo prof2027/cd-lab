@@ -1,6 +1,6 @@
 %{
     #include <stdlib.h>
-    #include "q5.tab.h"
+    #include "for.tab.h"
 
     
 %}
