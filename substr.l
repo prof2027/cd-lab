@@ -25,4 +25,6 @@ int yywrap(){
 
 
 // compile -> lex substr.l
-// gcc lex.yy.c -o substr
+// yacc -d substr.y
+// gcc substr.tab.c lex.yy.c -o substr
+
