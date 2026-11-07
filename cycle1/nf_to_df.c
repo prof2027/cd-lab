@@ -4,6 +4,7 @@ int n, noalpha, start_state, n_final;
 int is_final[20];
 char alpha[10];
 
+
 int nfa[20][10][20];       
 int dfa_states[20][20];    
 int dfa_trans[20][10];     
