@@ -1,177 +1,133 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
-char ip_sym[15], ip_ptr = 0, op[50], tmp[50];
-void e_prime();
-void e();
-void t_prime();
-void t();
-void f();
-void advance();
-int n = 0;
+char input[100];
+int pos = 0;
 
-void e() {
-    strcpy(op, "TE'");
-    printf("E=%-25s", op);
-    printf("E->TE'\n");
-    t();
-    e_prime();
+void E();
+void E_prime();
+void T();
+void T_prime();
+void F();
+
+void advance()
+{
+    pos++;
 }
 
-void e_prime() {
-    int i, n = 0, l;
-    for (i = 0; i <= strlen(op); i++)
-        if (op[i] != 'e')
-            tmp[n++] = op[i];
-    strcpy(op, tmp);
-    l = strlen(op);
-    for (n = 0; n < l && op[n] != 'E'; n++);
-    
-    if (ip_sym[ip_ptr] == '+') {
-        i = n + 2;
-        do {
-            op[i + 2] = op[i];
-            i++;
-        } while (i <= l);
-        op[n++] = '+';
-        op[n++] = 'T';
-        op[n++] = 'E';
-        op[n++] = 39;
-        printf("E=%-25s", op);
-        printf("E'->+TE'\n");
+// E -> TE'
+void E()
+{
+    printf("E -> TE'\n");
+
+    T();
+    E_prime();
+}
+
+// E' -> +TE' | e
+void E_prime()
+{
+    if (input[pos] == '+')
+    {
+        printf("E' -> +TE'\n");
+
         advance();
-        t();
-        e_prime();
-    } else {
-        op[n] = 'e';
-        for (i = n + 1; i <= strlen(op); i++)
-            op[i] = op[i + 1];
-        printf("E=%-25s", op);
-        printf("E'->e\n");
+        T();
+        E_prime();
+    }
+    else
+    {
+        printf("E' -> e\n");
     }
 }
 
-void t() {
-    int i, n = 0, l;
-    for (i = 0; i <= strlen(op); i++)
-        if (op[i] != 'e')
-            tmp[n++] = op[i];
-    strcpy(op, tmp);
-    l = strlen(op);
-    for (n = 0; n < l && op[n] != 'T'; n++);
+// T -> FT'
+void T()
+{
+    printf("T -> FT'\n");
 
-    i = n + 1;
-    do {
-        op[i + 2] = op[i];
-        i++;
-    } while (i < l);
-    op[n++] = 'F';
-    op[n++] = 'T';
-    op[n++] = 39;
-    printf("E=%-25s", op);
-    printf("T->FT'\n");
-    f();
-    t_prime();
+    F();
+    T_prime();
 }
 
-void t_prime() {
-    int i, n = 0, l;
-    for (i = 0; i <= strlen(op); i++)
-        if (op[i] != 'e')
-            tmp[n++] = op[i];
-    strcpy(op, tmp);
-    l = strlen(op);
-    for (n = 0; n < l && op[n] != 'T'; n++);
-    
-    if (ip_sym[ip_ptr] == '*') {
-        i = n + 2;
-        do {
-            op[i + 2] = op[i];
-            i++;
-        } while (i < l);
-        op[n++] = '*';
-        op[n++] = 'F';
-        op[n++] = 'T';
-        op[n++] = 39;
-        printf("E=%-25s", op);
-        printf("T'->*FT'\n");
+// T' -> *FT' | e
+void T_prime()
+{
+    if (input[pos] == '*')
+    {
+        printf("T' -> *FT'\n");
+
         advance();
-        f();
-        t_prime();
-    } else {
-        op[n] = 'e';
-        for (i = n + 1; i <= strlen(op); i++)
-            op[i] = op[i + 1];
-        printf("E=%-25s", op);
-        printf("T'->e\n");
+        F();
+        T_prime();
+    }
+    else
+    {
+        printf("T' -> e\n");
     }
 }
 
-void f() {
-    int i, n = 0, l;
-    for (i = 0; i <= strlen(op); i++)
-        if (op[i] != 'e')
-            tmp[n++] = op[i];
-    strcpy(op, tmp);
-    l = strlen(op);
-    for (n = 0; n < l && op[n] != 'F'; n++);
-    
-    if ((ip_sym[ip_ptr] == 'i') || (ip_sym[ip_ptr] == 'I')) {
-        op[n] = 'i';
-        printf("E=%-25s", op);
-        printf("F->i\n");
+// F -> (E) | i
+void F()
+{
+    if (input[pos] == 'i' || input[pos] == 'I')
+    {
+        printf("F -> i\n");
         advance();
-    } else {
-        if (ip_sym[ip_ptr] == '(') {
+    }
+    else if (input[pos] == '(')
+    {
+        printf("F -> (E)\n");
+
+        advance();
+        E();
+
+        if (input[pos] == ')')
+        {
             advance();
-            e();
-            if (ip_sym[ip_ptr] == ')') {
-                advance();
-                i = n + 2;
-                do {
-                    op[i + 2] = op[i];
-                    i++;
-                } while (i <= l);
-                op[n++] = '(';
-                op[n++] = 'E';
-                op[n++] = ')';
-                printf("E=%-25s", op);
-                printf("F->(E)\n");
-            }
-        } else {
-            printf("\n\t syntax error");
+        }
+        else
+        {
+            printf("Syntax Error: Missing closing parenthesis\n");
             exit(1);
         }
     }
-}
-
-void advance() {
-    ip_ptr++;
-}
-
-void main() {
-    int i;
-    
-    printf("\nGrammar without left recursion");
-    printf("\n\t\t E->TE' \n\t\t E'->+TE'|e \n\t\t T->FT' ");
-    printf("\n\t\t T'->*FT'|e \n\t\t F->(E)|i");
-    printf("\n Enter the input expression: ");
-    scanf("%s", ip_sym);
-    printf("Expressions\t Sequence of production rules\n");
-    e();
-    
-    for (i = 0; i < strlen(ip_sym); i++) {
-        if (ip_sym[i] != '+' && ip_sym[i] != '*' && ip_sym[i] != '(' &&
-            ip_sym[i] != ')' && ip_sym[i] != 'i' && ip_sym[i] != 'I') {
-            printf("\nSyntax error");
-            break;
-        }
-        for (i = 0; i <= strlen(op); i++)
-            if (op[i] != 'e')
-                tmp[n++] = op[i];
-        strcpy(op, tmp);
-        printf("\nE=%-25s", op);
+    else
+    {
+        printf("Syntax Error at position %d\n", pos);
+        exit(1);
     }
+}
+
+int main()
+{
+    printf("\nGRAMMAR:\n");
+    printf("E  -> TE'\n");
+    printf("E' -> +TE' | e\n");
+    printf("T  -> FT'\n");
+    printf("T' -> *FT' | e\n");
+    printf("F  -> (E) | i\n");
+
+    printf("\nEnter the input expression: ");
+    scanf("%99s", input);
+
+    printf("\nPRODUCTION RULES:\n");
+
+    E();
+
+    // Check whether the entire input is consumed
+    if (input[pos] == '\0')
+    {
+        printf("\nString ACCEPTED!\n");
+    }
+    else
+    {
+        printf("\nSyntax Error: Unexpected symbol '%c' at position %d\n",
+               input[pos], pos);
+        printf("String REJECTED!\n");
+    }
+
+    return 0;
 }

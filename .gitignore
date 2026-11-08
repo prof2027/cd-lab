@@ -3,3 +3,5 @@
 *.tab.*
 *.yy.*
 */*.exe
+*/*.out
+test/

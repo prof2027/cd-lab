@@ -1,99 +1,106 @@
+
 #include <stdio.h>
 #include <string.h>
 
-int k = 0, z = 0, i = 0, j = 0, c = 0;
-char a[16], ac[20], stk[15], act[10];
+char stack[30], input[30];
+int top = -1, i = 0;
 
-void check();
-
-int main() {
-    puts("GRAMMAR is E->E+E \n E->E*E \n E->(E) \n E->id");
-    puts("enter input string: ");
-    scanf("%15s", a);
-    c = strlen(a);
-    strcpy(act, "SHIFT->");
-    puts("stack \t input \t action");
-
-    for (k = 0, i = 0, j = 0; j < c; k++, j++) {
-        if (a[j] == 'i' && a[j + 1] == 'd') {
-            stk[i] = a[j];
-            stk[i + 1] = a[j + 1];
-            stk[i + 2] = '\0';
-            a[j] = ' ';
-            a[j + 1] = ' ';
-            i += 2; // Shifted 2 characters
-            printf("\n$%s\t%s$\t%sid", stk, a, act);
-            check();
-            j++; // Skip the 'd' character in the main loop
-        } else {
-            stk[i] = a[j];
-            stk[i + 1] = '\0';
-            a[j] = ' ';
-            i += 1; // Shifted 1 character
-            printf("\n$%s\t%s$\t%ssymbols", stk, a, act);
-            check();
-        }
-    }
-    return 0;
-}
-
-void check() {
-    strcpy(ac, "REDUCE TO E");
+void check()
+{
     int reduced = 1;
 
-    // Keep checking until no more reductions can be made
-    while (reduced) {
+    while (reduced)
+    {
         reduced = 0;
 
-        // 1. E -> id
-        for (z = 0; stk[z] != '\0'; z++) {
-            if (stk[z] == 'i' && stk[z + 1] == 'd') {
-                stk[z] = 'E';
-                stk[z + 1] = '\0';
-                printf("\n$%s\t%s$\t%s", stk, a, ac);
-                i = i - 1; // 2 characters ('id') replaced by 1 ('E')
-                reduced = 1;
-                break;
-            }
+        
+        if (top >= 1 &&
+            stack[top - 1] == 'i' &&
+            stack[top] == 'd')
+        {
+            stack[top - 1] = 'E';
+            top--;
+            stack[top + 1] = '\0';
+
+            printf("\nREDUCE E -> id");
+            reduced = 1;
         }
 
-        // 2. E -> E + E
-        for (z = 0; stk[z] != '\0'; z++) {
-            if (stk[z] == 'E' && stk[z + 1] == '+' && stk[z + 2] == 'E') {
-                stk[z] = 'E';
-                stk[z + 1] = '\0';
-                stk[z + 2] = '\0';
-                printf("\n$%s\t%s$\t%s", stk, a, ac);
-                i = i - 2; // 3 characters replaced by 1 ('E')
-                reduced = 1;
-                break;
-            }
+        
+        else if (top >= 2 &&
+                 stack[top - 2] == '(' &&
+                 stack[top - 1] == 'E' &&
+                 stack[top] == ')')
+        {
+            stack[top - 2] = 'E';
+            top -= 2;
+            stack[top + 1] = '\0';
+
+            printf("\nREDUCE E -> (E)");
+            reduced = 1;
         }
 
-        // 3. E -> E * E
-        for (z = 0; stk[z] != '\0'; z++) {
-            if (stk[z] == 'E' && stk[z + 1] == '*' && stk[z + 2] == 'E') {
-                stk[z] = 'E';
-                stk[z + 1] = '\0';
-                stk[z + 2] = '\0'; // Fixed copy-paste bug
-                printf("\n$%s\t%s$\t%s", stk, a, ac);
-                i = i - 2;
-                reduced = 1;
-                break;
-            }
+        
+        else if (top >= 2 &&
+                 stack[top - 2] == 'E' &&
+                 stack[top - 1] == '+' &&
+                 stack[top] == 'E')
+        {
+            stack[top - 2] = 'E';
+            top -= 2;
+            stack[top + 1] = '\0';
+
+            printf("\nREDUCE E -> E+E");
+            reduced = 1;
         }
 
-        // 4. E -> ( E )
-        for (z = 0; stk[z] != '\0'; z++) {
-            if (stk[z] == '(' && stk[z + 1] == 'E' && stk[z + 2] == ')') {
-                stk[z] = 'E';
-                stk[z + 1] = '\0';
-                stk[z + 2] = '\0'; // Fixed copy-paste bug
-                printf("\n$%s\t%s$\t%s", stk, a, ac);
-                i = i - 2;
-                reduced = 1;
-                break;
-            }
+        
+        else if (top >= 2 &&
+                 stack[top - 2] == 'E' &&
+                 stack[top - 1] == '*' &&
+                 stack[top] == 'E')
+        {
+            stack[top - 2] = 'E';
+            top -= 2;
+            stack[top + 1] = '\0';
+
+            printf("\nREDUCE E -> E*E");
+            reduced = 1;
         }
     }
+}
+
+int main()
+{
+    printf("GRAMMAR:\n");
+    printf("E -> E+E\n");
+    printf("E -> E*E\n");
+    printf("E -> (E)\n");
+    printf("E -> id\n");
+
+    printf("\nEnter input string: ");
+    scanf("%29s", input);
+
+    printf("\nSTACK\t\tINPUT\t\tACTION\n");
+
+    while (input[i] != '\0')
+    {
+       
+        stack[++top] = input[i++];
+        stack[top + 1] = '\0';
+
+        printf("\n%-16s %-16s SHIFT", stack, input + i);
+
+        
+        check();
+
+        printf("\n%-16s %-16s REDUCE", stack, input + i);
+    }
+
+    if (top == 0 && stack[0] == 'E')
+        printf("\n\nString ACCEPTED!\n");
+    else
+        printf("\n\nString REJECTED!\n");
+
+    return 0;
 }
