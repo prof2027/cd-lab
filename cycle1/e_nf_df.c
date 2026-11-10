@@ -2,9 +2,9 @@
 
 #define MAX 10
 
-int eps[MAX][MAX];        // epsilon closure: eps[i][j] = 1 if j reachable from i via epsilons
-int trans[MAX][MAX][MAX]; // trans[q][a][p] = 1 if q --a--> p in the input e-NFA
-int newt[MAX][MAX][MAX];  // transitions of the resulting NFA
+int eps[MAX][MAX];        
+int trans[MAX][MAX][MAX]; 
+int newt[MAX][MAX][MAX];
 int fin[MAX], newfin[MAX];
 char sym[MAX];
 
@@ -36,14 +36,13 @@ int main() {
                 if (sym[a] == c) trans[from][a][to] = 1;
     }
 
-    // Epsilon closure (every state reaches itself, then Warshall)
     for (i = 0; i < n; i++) eps[i][i] = 1;
     for (k = 0; k < n; k++)
         for (i = 0; i < n; i++)
             for (j = 0; j < n; j++)
                 if (eps[i][k] && eps[k][j]) eps[i][j] = 1;
 
-    // New transition: q =eps*=> r --a--> p =eps*=> s
+  
     for (q = 0; q < n; q++)
         for (a = 0; a < m; a++)
             for (r = 0; r < n; r++) if (eps[q][r])
@@ -51,7 +50,7 @@ int main() {
                     for (s = 0; s < n; s++) if (eps[p][s])
                         newt[q][a][s] = 1;
 
-    // q is final if its epsilon closure contains a final state
+
     for (q = 0; q < n; q++)
         for (r = 0; r < n; r++)
             if (eps[q][r] && fin[r]) newfin[q] = 1;

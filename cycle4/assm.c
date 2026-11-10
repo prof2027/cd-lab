@@ -6,7 +6,6 @@ void generate_8086(char *line) {
     char lhs[10], arg1[10], op[5], arg2[10];
     int count = sscanf(line, "%s = %s %s %s", lhs, arg1, op, arg2);
 
-    // Simple assignment: x = a
     if (count == 2) {
         printf("    MOV AX, %s\n", arg1);
         printf("    MOV %s, AX\n", lhs);

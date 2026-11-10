@@ -42,7 +42,7 @@ void check()
 
         
         else if (top >= 2 &&
-                 stack[top - 2] == 'E' &&
+                 stack[top - 2] == 'E' &&   
                  stack[top - 1] == '+' &&
                  stack[top] == 'E')
         {

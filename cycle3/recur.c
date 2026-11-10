@@ -117,7 +117,6 @@ int main()
 
     E();
 
-    // Check whether the entire input is consumed
     if (input[pos] == '\0')
     {
         printf("\nString ACCEPTED!\n");
