@@ -1,70 +1,103 @@
 #include <stdio.h>
 
-#define MAX 10
+int n, noalpha, n_final;
+int e_adj[20][20];         
+int trans[20][10][20];    
+int e_close[20][20];       
+int is_final[20];         
+char alpha[10];
 
-int eps[MAX][MAX];        
-int trans[MAX][MAX][MAX]; 
-int newt[MAX][MAX][MAX];
-int fin[MAX], newfin[MAX];
-char sym[MAX];
+
+void dfs(int start, int curr) {
+    e_close[start][curr] = 1;
+    for (int i = 1; i <= n; i++) {
+        if (e_adj[curr][i] && !e_close[start][i]) {
+            dfs(start, i);
+        }
+    }
+}
 
 int main() {
-    int n, m, nf, t, i, j, k, q, a, r, p, s;
+    int t;
 
-    printf("Number of states (0..n-1): ");
+    printf("Enter number of states: ");
     scanf("%d", &n);
 
-    printf("Number of input symbols: ");
-    scanf("%d", &m);
-    printf("Enter the symbols: ");
-    for (i = 0; i < m; i++) scanf(" %c", &sym[i]);
-
-    printf("Number of final states: ");
-    scanf("%d", &nf);
-    printf("Enter final states: ");
-    for (i = 0; i < nf; i++) { scanf("%d", &j); fin[j] = 1; }
-
-    printf("Number of transitions: ");
-    scanf("%d", &t);
-    printf("Enter transitions as: from symbol to   (use 'e' for epsilon)\n");
-    for (i = 0; i < t; i++) {
-        int from, to; char c;
-        scanf("%d %c %d", &from, &c, &to);
-        if (c == 'e') eps[from][to] = 1;
-        else
-            for (a = 0; a < m; a++)
-                if (sym[a] == c) trans[from][a][to] = 1;
+    printf("Enter number of alphabets (excluding 'e'): ");
+    scanf("%d", &noalpha);
+    printf("Enter alphabets: ");
+    for (int i = 0; i < noalpha; i++) {
+        scanf(" %c", &alpha[i]);
     }
 
-    for (i = 0; i < n; i++) eps[i][i] = 1;
-    for (k = 0; k < n; k++)
-        for (i = 0; i < n; i++)
-            for (j = 0; j < n; j++)
-                if (eps[i][k] && eps[k][j]) eps[i][j] = 1;
+    printf("Enter number of transitions: ");
+    scanf("%d", &t);
+    printf("Enter transitions (format: from symbol to):\n");
+    for (int i = 0; i < t; i++) {
+        int u, v;
+        char sym;
+        scanf("%d %c %d", &u, &sym, &v);
 
-  
-    for (q = 0; q < n; q++)
-        for (a = 0; a < m; a++)
-            for (r = 0; r < n; r++) if (eps[q][r])
-                for (p = 0; p < n; p++) if (trans[r][a][p])
-                    for (s = 0; s < n; s++) if (eps[p][s])
-                        newt[q][a][s] = 1;
+        if (sym == 'e' || sym == 'E') {
+            e_adj[u][v] = 1;
+        } else {
+            for (int a = 0; a < noalpha; a++) {
+                if (alpha[a] == sym) trans[u][a][v] = 1;
+            }
+        }
+    }
+
+    printf("Enter number of final states: ");
+    scanf("%d", &n_final);
+    printf("Enter final states: ");
+    for (int i = 0; i < n_final; i++) {
+        int f;
+        scanf("%d", &f);
+        is_final[f] = 1;
+    }
 
 
-    for (q = 0; q < n; q++)
-        for (r = 0; r < n; r++)
-            if (eps[q][r] && fin[r]) newfin[q] = 1;
+    for (int i = 1; i <= n; i++) {
+        dfs(i, i);
+    }
 
-    printf("\nNFA transitions:\n");
-    for (q = 0; q < n; q++)
-        for (a = 0; a < m; a++) {
-            printf("d(q%d, %c) = { ", q, sym[a]);
-            for (s = 0; s < n; s++) if (newt[q][a][s]) printf("q%d ", s);
+    printf("\n--- Transitions of NFA without Epsilon ---\n");
+    for (int i = 1; i <= n; i++) {
+        for (int a = 0; a < noalpha; a++) {
+            int result[20] = {0};
+
+            for (int q = 1; q <= n; q++) {
+                if (e_close[i][q]) {              
+                    for (int r = 1; r <= n; r++) {
+                        if (trans[q][a][r]) {    
+                            for (int w = 1; w <= n; w++) {
+                                if (e_close[r][w]) 
+                                    result[w] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            printf("delta'(q%d, %c) = { ", i, alpha[a]);
+            for (int k = 1; k <= n; k++) {
+                if (result[k]) printf("q%d ", k);
+            }
             printf("}\n");
         }
+    }
 
-    printf("\nFinal states: ");
-    for (q = 0; q < n; q++) if (newfin[q]) printf("q%d ", q);
-    printf("\n");
+  
+    printf("\nNew Final States: { ");
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (e_close[i][j] && is_final[j]) {
+                printf("q%d ", i);
+                break;
+            }
+        }
+    }
+    printf("}\n");
+
     return 0;
 }
